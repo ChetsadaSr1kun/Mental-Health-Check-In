@@ -19,12 +19,19 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- css เสริมของหน้าเลือกแบบประเมิน + scroll animation + modal + hero ใหม่ -->
+  <!-- css เสริมของหน้าเลือกแบบประเมิน + scroll animation + modal + hero ใหม่ -->
   <style>
+    /* ให้พื้นหลังหน้าเว็บเป็นสีขาว และตัวหนังสือเป็นโทนเข้มอ่านง่าย */
+    body{
+      background:#ffffff;
+      color:#0f172a;
+    }
+
     .assessment-section {
       text-align: left;
     }
     .assessment-text {
-      color: var(--txt-muted);
+      color: #64748b;
       margin-bottom: 18px;
     }
     .assess-grid {
@@ -32,22 +39,26 @@
       grid-template-columns: repeat(2, minmax(240px, 1fr));
       gap: 20px;
     }
+
+    /* การ์ด → สีขาว */
     .assess-card {
-      background: rgba(9,14,20,0.7);
-      border: 1px solid rgba(255,255,255,0.02);
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,0.06);
       border-radius: 22px;
       padding: 20px 22px 24px;
       display: flex;
       flex-direction: column;
       gap: 14px;
       min-height: 260px;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.06);
       transition: transform .2s ease-out, box-shadow .2s ease-out, border-color .2s ease-out;
     }
     .assess-card:hover {
       transform: translateY(-3px);
-      border-color: rgba(52,213,195,.4);
-      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+      border-color: rgba(37,99,235,.45);
+      box-shadow: 0 18px 40px rgba(15,23,42,.12);
     }
+
     .assess-head {
       display: flex;
       gap: 14px;
@@ -57,7 +68,7 @@
       font-size: 20px;
       font-weight: 600;
       margin: 0;
-      color: var(--txt);
+      color: #0f172a;
     }
     .assess-list {
       list-style: none;
@@ -66,12 +77,12 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
-      color: var(--txt-muted);
+      color: #64748b;
     }
     .assess-list li::before {
       content: "✓";
       margin-right: 6px;
-      color: var(--accent);
+      color: #22c55e;
     }
     .assess-footer { margin-top: auto; }
 
@@ -79,30 +90,65 @@
       width: 62px;
       height: 62px;
       border-radius: 18px;
-      background: rgba(52,213,195,0.12);
+      background: #e2f3ff;
       display: grid;
       place-items: center;
       font-size: 30px;
     }
-    .assess-btn {
-      width: 100%;
-      display: inline-block;
-      padding: 9px 18px 6px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-      color: var(--txt);
-      text-decoration: none;
-      font-weight: 600;
-      border-bottom: 3px solid rgba(255,255,255,0.12);
-      transition: .12s ease-out;
-      text-align: left;
-      cursor: pointer;
-    }
-    .assess-btn:hover {
-      background: rgba(52,213,195,0.18);
-    }
 
-    /* โหมดสว่าง */
+/* ===== ปุ่มเริ่มทำแบบประเมิน – สวยขึ้น ===== */
+.assess-btn {
+  width: 100%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 22px;
+  
+  background: linear-gradient(135deg, #d9e8ff 0%, #eef6ff 100%);
+  border-radius: 14px;
+
+  color: #0d1b2a;
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+
+  border: 2px solid rgba(0, 80, 180, 0.12);
+
+  box-shadow: 0 6px 20px rgba(0, 60, 150, 0.08);
+  transition: all .22s ease;
+}
+
+/* hover */
+.assess-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #cde1ff 0%, #e6f0ff 100%);
+  box-shadow: 0 10px 26px rgba(0, 60, 150, 0.15);
+  border-color: rgba(0, 95, 200, 0.25);
+}
+
+/* ===== ปรับกรอบการ์ดให้สวยขึ้น ===== */
+.assess-card {
+  background: #ffffff;
+  border-radius: 26px;
+  border: 1px solid rgba(0,0,0,0.06);
+
+  box-shadow:
+    0 2px 10px rgba(0,0,0,0.03),
+    0 12px 30px rgba(0,0,0,0.06);
+
+  transition: all .25s ease;
+}
+
+.assess-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 110, 255, 0.40);
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.05),
+    0 18px 42px rgba(0,110,255,0.18);
+}
+
+
+    /* (ไม่ใช้โหมด light-theme แล้ว แต่ปล่อยไว้ได้ ถ้าอยากลบก็ได้เหมือนกัน) */
     body.light-theme .assessment-section .assess-card {
       background: #ffffff;
       border: 1px solid rgba(0,0,0,0.04);
@@ -158,13 +204,13 @@
       z-index: 99999;
     }
     .assess-modal {
-      background: rgba(9,14,20,1);
-      border: 1px solid rgba(255,255,255,0.04);
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,0.08);
       border-radius: 20px;
       max-width: 460px;
       width: 92%;
       padding: 20px 20px 16px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+      box-shadow: 0 20px 50px rgba(15,23,42,.25);
       animation: fadeUpForm .35s ease-out;
     }
     body.light-theme .assess-modal {
@@ -201,16 +247,16 @@
     }
     .assess-form-group label {
       font-size: 13px;
-      color: var(--txt-muted);
+      color: #64748b;
     }
     .assess-form-group input,
     .assess-form-group select,
     .assess-form-group textarea {
-      background: rgba(3,6,10,0.35);
-      border: 1px solid rgba(255,255,255,0.03);
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
       border-radius: 12px;
       padding: 7px 10px 6px;
-      color: #fff;
+      color: #0f172a;
       font-family: inherit;
     }
     .assess-form-group textarea {
@@ -240,7 +286,7 @@
     }
     .assess-hint {
       font-size: 11.5px;
-      color: var(--txt-muted);
+      color: #94a3b8;
       text-align: center;
       margin-top: 8px;
     }
@@ -270,14 +316,13 @@
       text-align: center;
       padding: 60px 20px 50px;
       color: #0d1b2a;
-      position: relative; /* สำหรับวางรูปด้านขวา */
+      position: relative;
     }
     .hero-text-inner {
       max-width: 900px;
       margin: 0 auto;
     }
 
-    /* รูปด้านขวาบน */
     .hero-side-img {
       position: absolute;
       right: 48px;
@@ -303,29 +348,34 @@
       }
     }
 
-    .hero-text-white .mh-sub-th {
-      color: #00847e;
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    .hero-text-white .mh-title-en {
-      color: #0d1b2a;
-      font-size: 48px;
-      font-weight: 900;
-      margin: 0;
-    }
-    .hero-text-white .mh-quote {
-      color: rgba(0,0,0,0.55);
-      margin-top: 16px;
-      font-size: 18px;
-    }
+.hero-text-white .mh-sub-th {
+  color: #00847e;
+  font-size: 34px;       /* เดิม 28px → ใหญ่ขึ้น */
+  font-weight: 800;      /* หนาขึ้น */
+  margin-bottom: 12px;
+}
+
+.hero-text-white .mh-title-en {
+  color: #0d1b2a;
+  font-size: 56px;       /* เดิม 48px → ใหญ่ขึ้น */
+  font-weight: 900;      /* หนาขึ้นสุด */
+  margin: 0;
+}
+
+.hero-text-white .mh-quote {
+  color: rgba(0,0,0,0.65);
+  font-size: 22px;       /* เดิม 18px → ใหญ่ขึ้น */
+  font-weight: 600;      /* เพิ่มความหนา */
+  margin-top: 18px;
+}
+
     .hero-text-white .mh-btn {
       background: linear-gradient(135deg, #34d5c3 0%, #2f80ed 85%);
       border-color: rgba(52,213,195,0.35);
       color: #ffffff;
     }
   </style>
+
 </head>
 <body>
   <!-- ปุ่มเปลี่ยนธีม (มุมขวาบน) -->
