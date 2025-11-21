@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mental Health Check-In</title>
+
+  <!-- ฟอนต์ -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Leaflet (แผนที่) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- css หลัก -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- css เสริมของหน้าเลือกแบบประเมิน + scroll animation + modal + hero ใหม่ -->
+  <style>
+    .assessment-section {
+      text-align: left;
+    }
+    .assessment-text {
+      color: var(--txt-muted);
+      margin-bottom: 18px;
+    }
+    .assess-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .assess-card {
+      background: rgba(9,14,20,0.7);
+      border: 1px solid rgba(255,255,255,0.02);
+      border-radius: 22px;
+      padding: 20px 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 260px;
+      transition: transform .2s ease-out, box-shadow .2s ease-out, border-color .2s ease-out;
+    }
+    .assess-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(52,213,195,.4);
+      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+    }
+    .assess-head {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .assess-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+      color: var(--txt);
+    }
+    .assess-list {
+      list-style: none;
+      padding: 0;
+      margin: 4px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--txt-muted);
+    }
+    .assess-list li::before {
+      content: "✓";
+      margin-right: 6px;
+      color: var(--accent);
+    }
+    .assess-footer { margin-top: auto; }
+
+    .assess-icon {
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      background: rgba(52,213,195,0.12);
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+    }
+    .assess-btn {
+      width: 100%;
+      display: inline-block;
+      padding: 9px 18px 6px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      color: var(--txt);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 3px solid rgba(255,255,255,0.12);
+      transition: .12s ease-out;
+      text-align: left;
+      cursor: pointer;
+    }
+    .assess-btn:hover {
+      background: rgba(52,213,195,0.18);
+    }
+
+    /* โหมดสว่าง */
+    body.light-theme .assessment-section .assess-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.025);
+    }
+    body.light-theme .assessment-section .assess-icon {
+      background: rgba(47,128,237,0.09);
+    }
+    body.light-theme .assessment-section .assess-btn {
+      background: rgba(7,79,117,0.035);
+      color: #0d1b2a;
+      border-bottom-color: rgba(9,30,66,0.12);
+    }
+    body.light-theme .assessment-section .assess-btn:hover {
+      background: rgba(31,166,214,0.12);
+    }
+
+    @media (max-width: 700px) {
+      .assess-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ========== SCROLL REVEAL ========== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(34px);
+      filter: blur(4px);
+      transition: all .7s cubic-bezier(0.17, 0.55, 0.55, 1);
+    }
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+    .summary-grid .card:nth-child(1) { transition-delay: .05s; }
+    .summary-grid .card:nth-child(2) { transition-delay: .12s; }
+    .summary-grid .card:nth-child(3) { transition-delay: .18s; }
+    .summary-grid .card:nth-child(4) { transition-delay: .24s; }
+    .summary-grid .card:nth-child(5) { transition-delay: .30s; }
+    .assess-grid .assess-card:nth-child(1) { transition-delay: .05s; }
+    .assess-grid .assess-card:nth-child(2) { transition-delay: .13s; }
+
+    /* ===== MODAL ฟอร์มประเมิน ===== */
+    .assess-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .assess-modal {
+      background: rgba(9,14,20,1);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 20px;
+      max-width: 460px;
+      width: 92%;
+      padding: 20px 20px 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+      animation: fadeUpForm .35s ease-out;
+    }
+    body.light-theme .assess-modal {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    @keyframes fadeUpForm {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .assess-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .assess-modal-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .assess-close {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .assess-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+    .assess-form-group label {
+      font-size: 13px;
+      color: var(--txt-muted);
+    }
+    .assess-form-group input,
+    .assess-form-group select,
+    .assess-form-group textarea {
+      background: rgba(3,6,10,0.35);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 7px 10px 6px;
+      color: #fff;
+      font-family: inherit;
+    }
+    .assess-form-group textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+    body.light-theme .assess-form-group input,
+    body.light-theme .assess-form-group select,
+    body.light-theme .assess-form-group textarea {
+      background: #f7fbff;
+      border: 1px solid rgba(0,0,0,0.03);
+      color: #0d1b2a;
+    }
+    .assess-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #34d5c3 0%, #2f80ed 90%);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 4px 8px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .assess-submit:hover {
+      filter: brightness(1.02);
+    }
+    .assess-hint {
+      font-size: 11.5px;
+      color: var(--txt-muted);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* ===== รูปด้านบนสุด ===== */
+    .top-image-section {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+    .top-hero-img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .img-fade-bottom {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%);
+    }
+
+    /* ===== HERO TEXT ใต้รูป ===== */
+    .hero-text-white {
+      background: #ffffff;
+      text-align: center;
+      padding: 60px 20px 50px;
+      color: #0d1b2a;
+      position: relative; /* สำหรับวางรูปด้านขวา */
+    }
+    .hero-text-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* รูปด้านขวาบน */
+    .hero-side-img {
+      position: absolute;
+      right: 48px;
+      top: -120px;
+      width: 360px;
+      max-width: 36%;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(13,34,56,0.12);
+      object-fit: cover;
+    }
+
+    @media (max-width: 992px) {
+      .hero-side-img {
+        right: 28px;
+        top: -100px;
+        width: 300px;
+        max-width: 34%;
+      }
+    }
+    @media (max-width: 768px) {
+      .hero-side-img {
+        display: none;
+      }
+    }
+
+    .hero-text-white .mh-sub-th {
+      color: #00847e;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .hero-text-white .mh-title-en {
+      color: #0d1b2a;
+      font-size: 48px;
+      font-weight: 900;
+      margin: 0;
+    }
+    .hero-text-white .mh-quote {
+      color: rgba(0,0,0,0.55);
+      margin-top: 16px;
+      font-size: 18px;
+    }
+    .hero-text-white .mh-btn {
+      background: linear-gradient(135deg, #34d5c3 0%, #2f80ed 85%);
+      border-color: rgba(52,213,195,0.35);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <!-- ปุ่มเปลี่ยนธีม (มุมขวาบน) -->
+  <button class="theme-toggle" id="themeToggle" aria-label="เปลี่ยนธีม">☀️</button>
+<!-- ===== HERO ===== -->
+<section class="hero-text-white reveal">
+
+  <!-- รูปอยู่ตรงกลาง -->
+  <div class="hero-img-center">
+    <img src="image/1P.jpg" alt="hero-jpg" class="hero-img">
+  <div class="hero-fade"></div>
+  </div>
+
+  <!-- ข้อความ Hero -->
+  <div class="hero-text-inner">
+    <p class="mh-sub-th">ตรวจสุขภาพใจ</p>
+
+    <h1 class="mh-title-en">เป็นจั่งได๋ ซำบายดีบ่</h1>
+
+    <p class="mh-quote">
+      "วันนี้คุณรู้สึกอย่างไร? เหนื่อยไหม? ไหวหรือเปล่า?"
+    </p>
+
+    <div class="mh-actions">
+      <a href="#dashboards" class="mh-btn"><span class="mh-icon">🕒</span> DASHBOARDS</a>
+      <a href="#assessment" class="mh-btn"><span class="mh-icon">🤕</span> เริ่มตรวจสุขภาพใจ</a>
+      <a href="#knowledge" class="mh-btn"><span class="mh-icon">💡</span> ความรู้สุขภาพจิต</a>
+      <a href="#qrcode" class="mh-btn"><span class="mh-icon">📄</span> สถิติ</a>
+    </div>
+  </div>
+
+</section>
+<!-- ===== END HERO ===== -->
+
+
+
+  <div class="container" id="start">
+    <!-- hero card ข้างใน -->
+    <section class="hero reveal" id="dashboards">
+      <h1>สุขภาพจิต "วัยรุ่นไทย"</h1>
+      <h1>สำรวจแรงกดดัน ภาวะหมดไฟ และการปรับตัวในโลกการทำงานยุคใหม่</h1>
+    </section>
+
+    <!-- SECTION: เลือกวิธีประเมินสุขภาพใจ -->
+    <section class="data-section assessment-section" id="assessment">
+      <h2>เลือกวิธีประเมินสุขภาพใจ</h2>
+      <p class="assessment-text">เลือกแบบที่ตรงกับการใช้งานของคุณมากที่สุด</p>
+
+      <div class="assess-grid">
+        <!-- การ์ด 1 -->
+        <div class="assess-card reveal">
+          <div class="assess-head">
+            <div class="assess-icon">🙂</div>
+            <p class="assess-title">ประเมินตัวเอง</p>
+          </div>
+          <ul class="assess-list">
+            <li>ตรวจสุขภาพใจให้กับตัวเอง</li>
+            <li>ประชาชนทั่วไป</li>
+          </ul>
+          <div class="assess-footer">
+            <button class="assess-btn">#เริ่มทำแบบประเมิน</button>
+          </div>
+        </div>
+
+        <!-- การ์ด 2 -->
+        <div class="assess-card reveal">
+          <div class="assess-head">
+            <div class="assess-icon">👨‍👩‍👧</div>
+            <p class="assess-title">ประเมินผู้อื่น</p>
+          </div>
+          <ul class="assess-list">
+            <li>ประเมินนักเรียน/ผู้รับบริการ</li>
+            <li>ครู บุคลากรสาธารณสุขใช้ได้</li>
+          </ul>
+          <div class="assess-footer">
+            <button class="assess-btn">#เริ่มทำแบบประเมิน</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: ภาพรวม -->
+    <section class="data-section reveal">
+      <h2>แนวโน้มความเครียดและการประเมิน (ภาพรวม)</h2>
+
+      <div class="header-card reveal">
+        <div class="header-left">
+          <div style="color:var(--txt-muted);font-weight:700">ภาพรวมความเสี่ยงสุขภาพใจ (ทุกกลุ่มอายุ)</div>
+          <h1>1,099,532 คน</h1>
+          <p style="color:var(--txt-muted)">จำนวนผู้ประเมินตนเอง (ข้อมูล ณ 30 ตุลาคม 2568)</p>
+        </div>
+        <div style="width:100%; max-width:280px">
+          <canvas id="genderDonut"></canvas>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="card c-8q reveal">
+          <div class="title">เสี่ยงวิตกกังวล (8Q)</div>
+          <div class="percent">17.33%</div>
+          <div class="label">(180,589 คน)</div>
+        </div>
+        <div class="card c-9q reveal">
+          <div class="title">เสี่ยงซึมเศร้า (9Q)</div>
+          <div class="percent">29.19%</div>
+          <div class="label">(320,905 คน)</div>
+        </div>
+        <div class="card c-st5 reveal">
+          <div class="title">เสี่ยงเครียด (ST5)</div>
+          <div class="percent">25.95%</div>
+          <div class="label">(285,297 คน)</div>
+        </div>
+        <div class="card c-burn reveal">
+          <div class="title">เสี่ยงหมดไฟ (Burnout)</div>
+          <div class="percent">6.18%</div>
+          <div class="label">(67,944 คน)</div>
+        </div>
+        <div class="card c-rq reveal">
+          <div class="title">พลังใจต่ำ (RQ)</div>
+          <div class="percent">19.23%</div>
+          <div class="label">(211,390 คน)</div>
+        </div>
+      </div>
+
+      <p class="intro reveal" id="knowledge">
+        กลุ่มคนอายุ 20-29 ปี กำลังอยู่ในช่วงเปลี่ยนผ่านที่สำคัญที่สุดช่วงหนึ่งของชีวิต...
+      </p>
+    </section>
+
+    <!-- SECTION: กราฟ -->
+    <section class="data-section reveal">
+      <div class="controls">
+        <h2 id="trendChartTitle">แนวโน้มความเครียด (ST5 ≥ 8) ตามเดือน/ปี</h2>
+        <select aria-label="เลือกข้อมูล" id="trendSelect">
+          <option value="st5">ภาวะเครียด (ST5)</option>
+          <option value="9q">ภาวะซึมเศร้า (9Q)</option>
+        </select>
+      </div>
+      <canvas id="trendChart" style="max-height:420px; width: 100%;"></canvas>
+      <div class="note">
+        หมายเหตุ: ข้อมูลตัวอย่างแสดงสัดส่วนร้อยละของผู้มีคะแนน ST5 ≥ 8 แยกตามเดือน
+      </div>
+
+      <p class="intro" style="margin-top: 22px;">
+        ข้อมูลแนวโน้ม (2563-2568) แสดงให้เห็นว่าคนไทยตื่นตัวในการประเมินสุขภาพจิต...
+      </p>
+    </section>
+
+    <!-- SECTION: แผนที่ -->
+    <section class="data-section reveal" id="qrcode">
+      <div class="map-flex">
+        <div class="map-main reveal">
+          <h2 style="color: var(--accent-2); margin: 0 0 12px 0; font-size: 24px;">ภาพรวมการกระจายตัวของภาวะเครียด (ST5)</h2>
+          <div id="map"></div>
+        </div>
+        <div class="map-side">
+          <div class="top-list-card reveal">
+            <h3>อันดับจังหวัด (เรียงตามความเครียด)</h3>
+            <ol id="topList"></ol>
+          </div>
+          <div class="legend-card reveal">
+            <div class="legend-title">ระดับความเครียด</div>
+            <div class="legend-gradient"></div>
+            <div class="legend-labels">
+              <span>น้อย</span><span>สูง</span>
+            </div>
+          </div>
+          <div class="top-list-card muted reveal">
+            <p>
+              ข้อมูลเชิงพื้นที่สะท้อนว่า <strong>กรุงเทพมหานคร</strong>
+              มีทั้งจำนวนผู้ประเมินสูง (143.1K) และสัดส่วนภาวะเครียดสูง (54.7%)
+            </p>
+          </div>
+        </div>
+      </div>
+      <p class="intro" style="margin-top:22px;">
+        กรุงเทพมหานคร และจังหวัดปริมณฑล เป็นพื้นที่ที่มีแรงกดดันจากการทำงานสูง จึงพบภาวะเครียดมากกว่าหลายพื้นที่ต่างจังหวัด
+      </p>
+    </section>
+
+    <!-- SECTION: หมอ / คำแนะนำ / สายด่วน -->
+    <div class="doctor-section reveal">
+      <img src="image/drwarot.jpg" alt="doctor">
+      <div class="doctor-text">
+        <h3>ดร.นพ.วรตม์ โชติพิทยสุนนท์ (แน็ต)</h3>
+        <p>จิตแพทย์เด็กและวัยรุ่น</p>
+      </div>
+    </div>
+
+    <blockquote class="reveal">
+      หากเริ่มรู้สึกหมดไฟ ไม่อยากตื่นไปทำงาน มองงานในแง่ลบ หรือประสิทธิภาพลดลง
+      ควรหาเวลาพัก และขอความช่วยเหลือจากผู้เชี่ยวชาญ
+    </blockquote>
+
+    <div class="hotline reveal">
+      <h2>สายด่วนกรมสุขภาพจิต <span class="number">1323</span></h2>
+    </div>
+
+    <div class="source reveal" style="text-align: center;">
+      ที่มา: กรมสุขภาพจิต (ข้อมูล ณ 18 พฤศจิกายน 2568)
+    </div>
+
+    <footer>
+      © 2025 Thai PBS | The Visual Project
+    </footer>
+  </div>
+
+  <!-- ===== MODAL ฟอร์มประเมิน ===== -->
+  <div class="assess-modal-backdrop" id="assessModal">
+    <div class="assess-modal">
+      <div class="assess-modal-header">
+        <div>
+          <div class="assess-modal-title" id="assessModalTitle">เริ่มทำแบบประเมิน</div>
+          <div style="font-size:12.5px;color:var(--txt-muted)">กรอกข้อมูลเพื่อเริ่มทำแบบประเมิน</div>
+        </div>
+        <button class="assess-close" id="assessClose" aria-label="ปิดฟอร์ม">×</button>
+      </div>
+
+      <form id="assessForm">
+        <input type="hidden" id="assessType" name="assessType" value="self" />
+
+        <div class="assess-form-group">
+          <label for="fullname">ชื่อ - นามสกุล</label>
+          <input type="text" id="fullname" name="fullname" placeholder="เช่น นางสาวสุนิสา ใจดี" required />
+        </div>
+
+        <div class="assess-form-group">
+          <label for="age">อายุ</label>
+          <input type="number" id="age" name="age" min="5" max="120" placeholder="เช่น 22" />
+        </div>
+
+        <div class="assess-form-group">
+          <label for="province">จังหวัด</label>
+          <select id="province" name="province">
+            <option value="">-- เลือกจังหวัด --</option>
+            <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+            <option value="เชียงใหม่">เชียงใหม่</option>
+            <option value="ขอนแก่น">ขอนแก่น</option>
+            <option value="นครราชสีมา">นครราชสีมา</option>
+            <option value="ภูเก็ต">ภูเก็ต</option>
+          </select>
+        </div>
+
+        <div class="assess-form-group">
+          <label for="note">สิ่งที่อยากเล่าเพิ่ม</label>
+          <textarea id="note" name="note" placeholder="ถ้ามีอาการหรือบริบทอื่นๆ เพิ่มเติม เขียนที่นี่ได้"></textarea>
+        </div>
+
+        <button type="submit" class="assess-submit">บันทึกและเริ่มประเมิน</button>
+        <p class="assess-hint">ข้อมูลนี้เก็บไว้ที่อุปกรณ์ของคุณเท่านั้น</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================= SCRIPT ======================= -->
+  <script>
+    // theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('mh-theme');
+    if (savedTheme === 'light') {
+      body.classList.add('light-theme');
+      themeToggle.textContent = '🌙';
+    }
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('light-theme');
+      const isLight = body.classList.contains('light-theme');
+      themeToggle.textContent = isLight ? '🌙' : '☀️';
+      localStorage.setItem('mh-theme', isLight ? 'light' : 'dark');
+    });
+
+    // scroll reveal แบบใช้ IntersectionObserver
+    (function() {
+      const reveals = document.querySelectorAll('.reveal');
+
+      if ('IntersectionObserver' in window) {
+        const ob = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('show');
+              ob.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15 });
+
+        reveals.forEach(el => ob.observe(el));
+      } else {
+        function revealOnScroll() {
+          const winH = window.innerHeight;
+          reveals.forEach((el) => {
+            const top = el.getBoundingClientRect().top;
+            if (top < winH - 120) {
+              el.classList.add('show');
+            }
+          });
+        }
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll();
+      }
+    })();
+
+    // doughnut
+    const ctxDonut = document.getElementById('genderDonut');
+    if (ctxDonut) {
+      const dataGender = {
+        labels: [ 'หญิง (64.3%)', 'ชาย (35.7%)' ],
+        datasets: [{
+          label: 'สัดส่วนเพศ',
+          data: [64.3, 35.7],
+          backgroundColor: [ '#E91E63', '#1565C0' ],
+          borderColor: [ '#FFFFFF' ],
+          borderWidth: 3,
+          hoverOffset: 4
+        }]
+      };
+      new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: dataGender,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { family: "'Prompt', sans-serif", size: 14 } }
+            }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+
+    // line chart
+    const ctxTrend = document.getElementById('trendChart');
+    if (ctxTrend) {
+      const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+      const st5Data = [
+        {label:'2563',data:[4,5,0,8,7,2,3,2,5,10,25,12],borderColor:'#9E9E9E',tension:0.3,pointRadius:4,fill:false},
+        {label:'2564',data:[12,6,4,5,6,7,12,54,22,18,17,13],borderColor:'#81C784',tension:0.3,pointRadius:4,fill:false},
+        {label:'2565',data:[28,6,7,8,10,12,17,25,20,21,15,23],borderColor:'#FFD54F',tension:0.3,pointRadius:4,fill:false},
+        {label:'2566',data:[14.3,7.8,8,13.5,23.8,19.2,19,17.7,30.9,51.0,24.2,28.5],borderColor:'#FFB74D',tension:0.3,pointRadius:4,fill:false},
+        {label:'2567',data:[38.7,32.0,16.9,23.8,17.5,16.0,28.1,17.7,30.9,23.8,25.0,16.0],borderColor:'#64B5F6',tension:0.3,pointRadius:4,fill:false},
+        {label:'2568 (Mock)',data:[38,14,16,23,26,24,28,54,30.9,51.0,26,28],borderColor:'#E53935',tension:0.3,pointRadius:5,fill:false}
+      ];
+
+      const q9Data = [
+        {label:'2563',data:[2,3,1,5,4,1,2,3,4,8,20,10],borderColor:'#9E9E9E',tension:0.3,pointRadius:4,fill:false},
+        {label:'2564',data:[10,5,3,4,5,6,10,40,20,15,14,12],borderColor:'#81C784',tension:0.3,pointRadius:4,fill:false},
+        {label:'2565',data:[25,5,6,7,9,10,15,22,18,19,13,20],borderColor:'#FFD54F',tension:0.3,pointRadius:4,fill:false},
+        {label:'2566',data:[12,7,8,10,20,15,16,15,28,45,22,25],borderColor:'#FFB74D',tension:0.3,pointRadius:4,fill:false},
+        {label:'2567',data:[30,28,15,20,15,14,25,15,29,22,23,14],borderColor:'#64B5F6',tension:0.3,pointRadius:4,fill:false},
+        {label:'2568 (Mock)',data:[35,12,14,20,24,22,25,48,29,49,24,25],borderColor:'#E53935',tension:0.3,pointRadius:5,fill:false}
+      ];
+
+      const dataTrend = { labels: months, datasets: st5Data };
+      const trendChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins:{ legend:{ position:'top' } },
+        scales:{
+          y:{ beginAtZero:true, ticks:{ callback:v=>v+'%' } }
+        }
+      };
+      const myTrendChart = new Chart(ctxTrend, {
+        type:'line',
+        data: dataTrend,
+        options: trendChartOptions
+      });
+
+      document.getElementById('trendSelect').addEventListener('change', function() {
+        if (this.value === 'st5') {
+          myTrendChart.data.datasets = st5Data;
+          document.getElementById('trendChartTitle').innerText = 'แนวโน้มความเครียด (ST5 ≥ 8) ตามเดือน/ปี';
+        } else {
+          myTrendChart.data.datasets = q9Data;
+          document.getElementById('trendChartTitle').innerText = 'แนวโน้มภาวะซึมเศร้า (9Q ≥ 7) ตามเดือน/ปี';
+        }
+        myTrendChart.update();
+      });
+    }
+
+    // map
+    const mapEl = document.getElementById('map');
+    if (mapEl) {
+      const map = L.map('map', {
+        center: [13.75, 100.5],
+        zoom: 6,
+        scrollWheelZoom: false
+      });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap & CARTO'
+      }).addTo(map);
+
+      const allProvincesData = [
+        { name: "ปัตตานี", percent: 56.1, coords: [6.86, 101.25] },
+        { name: "กรุงเทพมหานคร", percent: 54.7, coords: [13.75, 100.5] },
+        { name: "นนทบุรี", percent: 54.6, coords: [13.85, 100.48] },
+        { name: "สมุทรสาคร", percent: 52.6, coords: [13.55, 100.27] },
+        { name: "ภูเก็ต", percent: 50.0, coords: [7.88, 98.39] },
+        { name: "เชียงใหม่", percent: 49.5, coords: [18.78, 98.98] },
+        { name: "ชลบุรี", percent: 48.2, coords: [13.36, 100.98] },
+        { name: "ระยอง", percent: 47.5, coords: [12.67, 101.27] }
+      ];
+
+      const topListEl = document.getElementById('topList');
+      if (topListEl) {
+        topListEl.innerHTML = allProvincesData
+          .map(p => `<li>${p.name} (<strong>${p.percent}%</strong>)</li>`)
+          .join('');
+      }
+
+      allProvincesData.slice(0,10).forEach(p => {
+        L.marker(p.coords).addTo(map)
+          .bindPopup(`<strong>${p.name}</strong><br>ภาวะเครียด: ${p.percent}%`);
+      });
+    }
+
+    // ====== FORM MODAL SCRIPT ======
+    const assessModal = document.getElementById('assessModal');
+    const assessClose = document.getElementById('assessClose');
+    const assessForm = document.getElementById('assessForm');
+    const assessTypeInput = document.getElementById('assessType');
+    const assessModalTitle = document.getElementById('assessModalTitle');
+    const assessButtons = document.querySelectorAll('.assess-btn');
+
+    assessButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const card = btn.closest('.assess-card');
+        const titleEl = card ? card.querySelector('.assess-title') : null;
+        const isOther = titleEl && titleEl.textContent.includes('ผู้อื่น');
+
+        if (isOther) {
+          assessTypeInput.value = 'other';
+          assessModalTitle.textContent = 'เริ่มประเมิน “ผู้อื่น”';
+        } else {
+          assessTypeInput.value = 'self';
+          assessModalTitle.textContent = 'เริ่มประเมิน “ตัวเอง”';
+        }
+
+        assessModal.style.display = 'flex';
+      });
+    });
+
+    assessClose.addEventListener('click', () => {
+      assessModal.style.display = 'none';
+    });
+    assessModal.addEventListener('click', (e) => {
+      if (e.target === assessModal) assessModal.style.display = 'none';
+    });
+
+    assessForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = {
+        type: assessTypeInput.value,
+        fullname: document.getElementById('fullname').value,
+        age: document.getElementById('age').value,
+        province: document.getElementById('province').value,
+        note: document.getElementById('note').value,
+        time: new Date().toISOString()
+      };
+
+      const old = JSON.parse(localStorage.getItem('mh-assess-history') || '[]');
+      old.unshift(formData);
+      localStorage.setItem('mh-assess-history', JSON.stringify(old));
+
+      alert('บันทึกข้อมูลแล้ว สามารถพาไปหน้าแบบประเมินจริงต่อได้');
+
+      assessModal.style.display = 'none';
+      // ตัวอย่าง redirect:
+      // if (formData.type === 'self') window.location.href = 'self-assessment.html';
+    });
+  </script>
+</body>
+</html>

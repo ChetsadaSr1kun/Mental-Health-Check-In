@@ -1,0 +1,743 @@
+:root{
+  --bg: #04070b;
+  --bg-2: #0a1016;
+  --bg-soft: #131821;
+  --stroke: rgba(255,255,255,0.04);
+  --txt: #ffffff;
+  --txt-muted: rgba(255,255,255,0.6);
+  --accent: #34d5c3;
+  --accent-2: #2f80ed;
+  --card-radius: 16px;
+  --shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+
+/* ========== GLOBAL ========== */
+*{
+  box-sizing: border-box;
+}
+
+/* โหลดฟอนต์ FC-Ekaluck */
+@font-face {
+  font-family: 'FCEkaluck';
+  src: url('font/FC-Ekaluck-VF.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ใช้ฟอนต์กับทั้งเว็บไซต์ */
+body{
+  margin: 0;
+  background: radial-gradient(circle at top, #10151f 0%, #04070b 60%);
+  color: var(--txt);
+  font-size: 18px;
+  font-family: 'FCEkaluck', sans-serif;   /* ← รวมในอันเดียว */
+}
+
+
+/* ========== HERO ด้านบน ========== */
+.mh-hero {
+  position: relative;
+  width: 100%;
+  height: 680px; /* ลดให้ไม่กินพื้นที่เกินไป */
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0) 60%, rgba(255,255,255,1) 100%),
+    url("image/1P.jpg") center top/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;   /* ดันข้อความและปุ่มลงล่าง */
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 0 24px 60px;        /* padding bottom สำหรับปุ่ม */
+}
+
+/* หมอก overlay */
+.mh-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      to bottom,
+      rgba(255,255,255,0) 10%,
+      rgba(255,255,255,0.4) 40%,
+      rgba(255,255,255,1) 85%
+  );
+  z-index: 1;
+}
+
+/* กลุ่มข้อความใน HERO */
+.mh-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ข้อความ */
+.mh-sub-th {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.mh-title-en {
+  font-size: 70px;
+  font-weight: 900;
+  margin: 0;
+}
+.mh-quote {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+/* ปุ่ม */
+.mh-actions {
+  margin-top: 35px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mh-pin {
+  font-size: 46px;
+}
+
+/* ข้อความรอง */
+.mh-sub-th {
+  font-size: 32px;
+  font-weight: 700;
+  margin-top: 26px;
+  margin-bottom: 10px;
+  text-shadow: 0 6px 24px rgba(0,0,0,0.45);
+  color: #e7fefb;
+}
+
+/* หัวเรื่องหลัก */
+.mh-title-en {
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 6px 0 0;
+  text-shadow: 0 10px 35px rgba(0,0,0,0.45);
+  line-height: 1.15;
+}
+
+/* ประโยคคำอธิบาย */
+.mh-quote {
+  font-size: 18px;
+  margin-top: 16px;
+  color: rgba(230,252,249,0.85);
+}
+
+/* ปุ่ม HERO */
+.mh-actions {
+  margin-top: 38px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.mh-btn {
+  background: linear-gradient(135deg, #34d5c3 0%, #2f80ed 85%);
+  border: 1px solid rgba(52,213,195,0.35);
+  color: #fff;
+  padding: 14px 30px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-decoration: none;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 12px 35px rgba(38,198,208,0.22);
+}
+.mh-btn:hover {
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 18px 48px rgba(38,198,208,0.38);
+  filter: brightness(1.03);
+}
+.mh-icon { font-size: 18px; }
+
+/* ========== MAIN CONTAINER ========== */
+.container{
+  max-width: 1450px;
+  margin: 24px auto 0;
+  padding: 0 24px 50px;
+}
+
+/* section blocks */
+.data-section,
+.hero {
+  background: rgba(9,14,20,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.025);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 22px;
+  padding: 32px 28px 28px;
+}
+
+/* การ์ดหัวข้อ “สุขภาพจิต วัยรุ่นไทย” */
+.hero {
+  text-align: center;
+  background: radial-gradient(
+    circle at top,
+    rgba(52,213,195,0.14) 0%,
+    rgba(9,14,20,0.10) 35%,
+    rgba(4,7,11,0) 100%
+  );
+}
+.hero h1 {
+  margin: 0 0 10px 0;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: .4px;
+}
+.hero p {
+  margin: 0;
+  max-width: 720px;
+  color: var(--txt-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ========== HEADER CARD + SUMMARY ========== */
+.data-section h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #e7fefb;
+}
+.header-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:14px;
+  background: linear-gradient(145deg, rgba(7,23,30,0.45) 0%, rgba(255,255,255,0) 84%);
+  border: 1px solid rgba(255,255,255,0.01);
+  border-radius: 18px;
+  padding: 32px 32px 28px;
+}
+.header-left div { color: var(--txt-muted); }
+.header-left h1{
+  font-size: 42px;
+  margin: 4px 0 4px;
+  color: #fff;
+}
+.header-left p{
+  color: var(--txt-muted);
+  font-size: 14px;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:22px;
+  margin-top:18px;
+}
+.card{
+  background: radial-gradient(circle at top, rgba(47,128,237,0.08) 0%, rgba(11,18,25,0.6) 45%);
+  border: 1px solid rgba(255,255,255,0.012);
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align:center;
+}
+.card .title{ font-size: 15px; color: var(--txt-muted); }
+.card .percent{ font-size: 32px; font-weight: 800; color: #fff; }
+.card .label{ font-size: 12px; color: var(--txt-muted); margin-top: 4px; }
+
+.intro {
+  background: rgba(3,5,7,0.35);
+  border: 1px solid rgba(255,255,255,0.005);
+  margin-top: 20px;
+  padding: 14px 8px 10px;
+  color: var(--txt-muted);
+  line-height: 1.7;
+  border-radius: 12px;
+}
+
+/* ========== SECTION เลือกแบบประเมิน ========== */
+.assessment-section {
+  text-align: left;
+  margin-top: 20px;
+}
+.assessment-text {
+  color: var(--txt-muted);
+  margin-bottom: 18px;
+}
+.assess-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 20px;
+}
+.assess-card {
+  background: rgba(9,14,20,0.7);
+  border: 1px solid rgba(255,255,255,0.02);
+  border-radius: 22px;
+  padding: 26px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 280px;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.assess-card:hover {
+  transform: translateY(-2px) scale(1.03);
+  border-color: rgba(52,213,195,.45);
+  box-shadow: 0 18px 40px rgba(0,0,0,.32);
+}
+.assess-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.assess-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--txt);
+}
+.assess-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--txt-muted);
+  font-size: 15px;
+}
+.assess-list li::before {
+  content: "✓";
+  margin-right: 6px;
+  color: var(--accent);
+}
+.assess-footer { margin-top: auto; }
+.assess-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  background: rgba(52,213,195,0.12);
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+}
+.assess-btn {
+  width: 100%;
+  display: inline-block;
+  padding: 9px 18px 6px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  color: var(--txt);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 3px solid rgba(255,255,255,0.12);
+  transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, filter .16s ease;
+  text-align: left;
+  font-size: 16px;
+}
+.assess-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(47,128,237,.25);
+  background: rgba(52,213,195,0.22);
+  filter: brightness(1.03);
+}
+
+/* โหมดสว่างสำหรับ SECTION ประเมิน */
+body.light-theme .assessment-section .assess-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.025);
+}
+body.light-theme .assessment-section .assess-icon {
+  background: rgba(47,128,237,0.09);
+}
+body.light-theme .assessment-section .assess-btn {
+  background: rgba(7,79,117,0.035);
+  color: #0d1b2a;
+  border-bottom-color: rgba(9,30,66,0.12);
+}
+body.light-theme .assessment-section .assess-btn:hover {
+  background: rgba(31,166,214,0.12);
+}
+
+/* ========== MAP AREA ========== */
+.map-flex { display: flex; flex-wrap: wrap; gap: 22px; }
+.map-main { flex: 2; min-width: 300px; }
+.map-side { flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 16px; }
+
+#map {
+  height: 580px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.015);
+  overflow: hidden;
+}
+.top-list-card,
+.legend-card {
+  background: rgba(5,8,11,0.6);
+  border: 1px solid rgba(255,255,255,0.01);
+  border-radius: 14px;
+  padding: 16px;
+}
+.top-list-card h3 {
+  margin: 0 0 10px 0;
+  color: #fff;
+  font-size: 15.5px;
+}
+.top-list-card ol {
+  padding-left: 20px;
+  margin: 0;
+  max-height: 380px;
+  overflow-y: auto;
+  color: var(--txt-muted);
+}
+
+/* ไล่สีตามระดับความเครียด (ต่ำ → สูง) ให้ตรงกับแผนที่ */
+.legend-title {
+  color: #fff;
+  margin-bottom: 8px;
+}
+.legend-gradient {
+  width: 100%;
+  height: 10px;
+  border-radius: 99px;
+  background: linear-gradient(
+    90deg,
+    #c4f1f9 0%,
+    #7fd3de 25%,
+    #38bec9 50%,
+    #14919b 75%,
+    #0b4f6c 100%
+  );
+}
+body.light-theme .legend-gradient {
+  background: linear-gradient(
+    90deg,
+    #e0f7fa 0%,
+    #b2ebf2 25%,
+    #80deea 50%,
+    #26c6da 75%,
+    #00838f 100%
+  );
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--txt-muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* ========== DOCTOR / HOTLINE / QUOTE / SOURCE ========== */
+.doctor-section,
+blockquote,
+.hotline,
+.source {
+  background: rgba(9,14,20,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.02);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+  padding: 16px 20px;
+}
+
+.doctor-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.doctor-section img{
+  width: 74px; height: 74px;
+  border-radius: 999px;
+  border: 2px solid rgba(52,213,195,0.55);
+  object-fit: cover;
+}
+.doctor-text p { color: var(--txt-muted); margin: 4px 0 0; }
+
+blockquote {
+  border-left: 4px solid rgba(47,128,237,0.35);
+  color: var(--txt-muted);
+  margin: 0 0 18px 0;
+}
+
+.hotline{
+  text-align: center;
+  font-size: 17px;
+}
+.hotline .number{
+  font-size: 44px;
+  font-weight: 800;
+  color: #34d5c3;
+}
+
+.source {
+  text-align: center;
+  font-size: 13px;
+  color: var(--txt-muted);
+  background: rgba(9,14,20,0.7);
+}
+
+/* footer */
+footer {
+  text-align: center;
+  color: rgba(255,255,255,0.25);
+  margin-top: 26px;
+}
+
+/* ===== ปุ่มเปลี่ยนธีม ===== */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: .15s ease-out;
+}
+.theme-toggle:hover {
+  transform: translateY(-2px);
+  background: rgba(0,0,0,0.4);
+}
+
+/* ========== LIGHT THEME OVERRIDE ========== */
+body.light-theme {
+  --txt: #0d1b2a;
+  --txt-muted: rgba(13,27,42,0.6);
+  background: radial-gradient(circle at top, #f3fbff 0%, #dce9f2 70%);
+  color: #0d1b2a;
+}
+
+/* HERO ในโหมดสว่าง */
+body.light-theme .mh-hero {
+  min-height: 520px;
+  padding-bottom: 140px;
+  background:
+    linear-gradient(140deg,
+      rgba(243,251,255,0.0) 0%,
+      rgba(243,251,255,0.15) 45%,
+      rgba(243,251,255,0.35) 85%
+    ),
+    url("image/1P.jpg") center/cover no-repeat;
+}
+body.light-theme .mh-overlay {
+  background-image:
+    linear-gradient(120deg,
+      rgba(255,255,255,0.005) 5%,
+      rgba(255,255,255,0) 40%
+    ),
+    linear-gradient(220deg,
+      rgba(47,128,237,0.02) 15%,
+      rgba(0,0,0,0) 55%
+    );
+}
+body.light-theme .mh-hero::after {
+  background: url("image/1P.jpg") center/cover no-repeat;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.18));
+}
+body.light-theme .mh-logo-circle {
+  border-color: rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.8);
+}
+body.light-theme .mh-sub-th { color: #007a77; }
+body.light-theme .mh-title-en { color: #0d1b2a; }
+body.light-theme .mh-quote { color: rgba(13,27,42,0.6); }
+body.light-theme .mh-btn {
+  background: linear-gradient(135deg, #1ccad8 0%, #2f80ed 100%);
+  border-color: rgba(36,167,208,0.3);
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(47,128,237,0.25);
+}
+
+/* การ์ดในโหมดสว่าง */
+body.light-theme .data-section,
+body.light-theme .hero {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.035);
+}
+body.light-theme .data-section h2 {
+  color: #0d1b2a;
+}
+body.light-theme .header-card {
+  background: linear-gradient(145deg, rgba(232,242,255,0.9) 0%, rgba(255,255,255,0) 84%);
+  border-color: rgba(0,0,0,0.02);
+}
+body.light-theme .header-left h1 { color: #0d1b2a; }
+body.light-theme .header-left div { color: rgba(13,27,42,0.75); }
+body.light-theme .header-left p { color: rgba(13,27,42,0.6); }
+
+body.light-theme .card {
+  background: #f7fbff;
+  border: 1px solid rgba(0,0,0,0.03);
+}
+body.light-theme .card .title { color: #617081; }
+body.light-theme .card .percent { color: #0d1b2a; }
+body.light-theme .intro {
+  background: #f1f6ff;
+  border: 1px solid rgba(155,190,214,0.25);
+  color: #44586a;
+}
+body.light-theme .top-list-card,
+body.light-theme .legend-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.02);
+}
+body.light-theme .legend-title { color: #0d1b2a; }
+
+body.light-theme .doctor-section,
+body.light-theme blockquote,
+body.light-theme .hotline,
+body.light-theme .source {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.025);
+}
+body.light-theme .hotline .number { color: #2f80ed; }
+body.light-theme .theme-toggle {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.05);
+  color: #0d1b2a;
+}
+body.light-theme .theme-toggle:hover {
+  background: #ffffff;
+}
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1100px){
+  .summary-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+@media (max-width: 768px){
+  .mh-title-en { font-size: 30px; }
+  .mh-sub-th { font-size: 22px; }
+  .mh-actions { flex-direction: column; }
+  .summary-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .map-flex { flex-direction: column; }
+  .container { padding: 0 12px 30px; }
+  .theme-toggle { top: 12px; right: 12px; }
+  .assess-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 460px){
+  .summary-grid{ grid-template-columns: 1fr; }
+}
+
+/* เคารพผู้ใช้ที่ปิดอนิเมชัน */
+@media (prefers-reduced-motion: reduce) {
+  .mh-btn,
+  .summary-grid .card,
+  .header-card,
+  .assess-card,
+  .assess-btn,
+  .top-list-card,
+  .legend-card {
+    transition: none !important;
+  }
+}
+
+/* ===== รูปตรงกลางของ HERO (ไม่มีกรอบ) ===== */
+.hero-img-center {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;   /* ระยะห่างจากข้อความ */
+}
+
+.hero-img-center img {
+  width: 700px;      /* ปรับขนาดตามที่ต้องการ เช่น 300–380px */
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border: none;
+  box-shadow: none;
+}
+
+.top-hero-img {
+  width: 100%;
+  max-height: 320px;  /* <<< ลดความสูง */
+  object-fit: cover;  /* <<< ครอบพื้นที่แบบพอดี */
+  object-position: center; /* <<< คุมตำแหน่งรูป */
+  display: block;
+}
+
+/* ถ้าหน้าจอเล็ก (มือถือ) ให้รูปเตี้ยลงอีก */
+@media (max-width: 768px) {
+  .top-hero-img {
+    max-height: 220px;
+  }
+}
+
+
+/* ===== HERO TEXT ใต้รูป ===== */
+.hero-text-white {
+  background: #ffffff;
+  text-align: center;
+  padding: 60px 20px 50px;
+  color: #0d1b2a;
+}
+
+/* position for right-side hero image */
+.hero-text-white { position: relative; }
+
+.hero-side-img {
+  position: absolute;
+  right: 48px;
+  top: -120px; /* pull image upward to sit near the top edge */
+  width: 360px;
+  max-width: 36%;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(13,34,56,0.12);
+  object-fit: cover;
+}
+
+@media (max-width: 992px) {
+  .hero-side-img { right: 28px; width: 300px; max-width: 34%; top: -100px; }
+}
+@media (max-width: 768px) {
+  .hero-side-img { display: none; }
+}
+
+.hero-text-inner {
+  max-width: 900px;
+  margin: auto;
+}
+
+.hero-text-white .mh-sub-th {
+  color: #00847e;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.hero-text-white .mh-title-en {
+  color: #0d1b2a;
+  font-size: 48px;
+  font-weight: 900;
+  margin: 0;
+}
+
+.hero-text-white .mh-quote {
+  color: rgba(0,0,0,0.55);
+  margin-top: 16px;
+  font-size: 18px;
+}
+
+.hero-text-white .mh-btn {
+  background: linear-gradient(135deg, #34d5c3 0%, #2f80ed 85%);
+  border-color: rgba(52,213,195,0.35);
+  color: white;
+}
+
+/* ปิด background ของ HERO เดิมทิ้ง */
+.mh-hero { display: none !important; }
+
